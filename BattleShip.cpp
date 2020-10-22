@@ -103,12 +103,29 @@ void fireShip(char playerName)
     }
 }
 
+void addShipMenu()
+{
+
+    cout << "\n____________________________________________";
+    cout << "\n\t\t  Add Ship";
+    cout << "\n____________________________________________";
+    cout << "\n\t   No  Name         Squares";
+    cout << "\n____________________________________________";
+    cout << "\n\t    1  Carrier         5";
+    cout << "\n\t    1  Battleship      4";
+    cout << "\n\t    2  Cruiser         3";
+    cout << "\n\t    1  Submarine       3";
+    cout << "\n\t    1  Destroyer       2";
+    cout << "\n____________________________________________\n\n";
+}
+
 void beginGame()
 {
     char playerName, X, Y;
     int count = 0;
     getPlayerName(playerName);
 
+    addShipMenu();
     while (count < 2)
     {
         addShips(count);
