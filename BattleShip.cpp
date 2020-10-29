@@ -102,14 +102,14 @@ bool checkIfPointPossible(char X, char Y, char direction, int length, char shipB
                     break;
                 case 'S':
                 case 's':
-                    if (integerCharX + length > 7)
+                    if (integerCharX + length > 8)
                     {
                         return false;
                     }
                     break;
                 case 'E':
                 case 'e':
-                    if (integerCharY + length > 7)
+                    if (integerCharY  + length > 7)
                     {
                         return false;
                     }
@@ -202,7 +202,7 @@ void addShips(int &count, char shipBoard[8][8], int &totalCells)
     }
     else
     {
-        cout << "\nInvalid entry. Please try again! \n";
+        cout << "\nInvalid entry. Please try again! \n\n";
     }
     printBoard(shipBoard);
 }
@@ -214,14 +214,14 @@ void enterToContinue()
     cin.get();            //“cin>>” expects at least one char input, just enter doesn’t work
 }
 
-void displayBoardState(int fireCount)
+void displayBoardState(int fireCount, char hitBoard[8][8])
 {
     int turn = fireCount;
-    cout << "\n_____________________________";
+    cout << "\n_____________________________\n";
     if(turn>0)
         cout << "\n\nTurn " << turn;
-    cout << "\nDisplaying the current board state\n\n";
-    // printBoard(hitBoard);
+    cout << "\n\nDisplaying the current board state\n\n";
+    printBoard(hitBoard);
 }
 
 void fireShip(char playerName, char hitBoard[8][8], char shipBoard[8][8], int totalCells)
@@ -229,11 +229,11 @@ void fireShip(char playerName, char hitBoard[8][8], char shipBoard[8][8], int to
     char X, Y;
     int fireCount = 0, hitCells = 0;
     cout << "\nPlayer " << playerName << " enter coordinates to fire:";
-    cout << "\n____________________________________";
-    printBoard(hitBoard);
+    cout << "\n____________________________________\n";
+    // printBoard(hitBoard);
     do
     {
-        displayBoardState(fireCount);
+        displayBoardState(fireCount,hitBoard);
         getCoordinates(X, Y);
         int integerCharY = Y - '0';
         int integerCharX = tolower(X) - 97;
@@ -248,13 +248,13 @@ void fireShip(char playerName, char hitBoard[8][8], char shipBoard[8][8], int to
                 hitBoard[integerCharY - 1][integerCharX] = 'H';
                 cout << "\nYou have a hit!\n";
                 hitCells++;
-                printBoard(hitBoard);
+                // printBoard(hitBoard);
             }
             else
             {
                 hitBoard[integerCharY - 1][integerCharX] = 'M';
                 cout << "\nYou have a miss!\n";
-                printBoard(hitBoard);
+                // printBoard(hitBoard);
             }
             fireCount++;
         }
@@ -268,6 +268,7 @@ void fireShip(char playerName, char hitBoard[8][8], char shipBoard[8][8], int to
     if (hitCells != 0 && hitCells == totalCells)
     {
         cout << "\nYou have won!";
+        displayBoardState(fireCount,hitBoard);
     }
 }
 
@@ -303,7 +304,7 @@ void beginGame()
     getPlayerName(playerName);
 
     addShipMenu();
-    while (count < 2)
+    while (count < 5)
     {
         addShips(count, shipBoard, totalCells);
         if (count == 5)
