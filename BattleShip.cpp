@@ -38,6 +38,24 @@ void getDirection(char &direction)
     } while (inValidDirection(direction));
 }
 
+bool checkValidX(char X)
+{
+    if ((X >= 'A' && X <= 'H') || (X >= 'a' && X <= 'h'))
+    {
+        return true;
+    }
+    return false;
+}
+
+bool checkValidY(char Y)
+{
+    if (Y >= '1' && Y <= '8')
+    {
+        return true;
+    }
+    return false;
+}
+
 void getCoordinates(char &X, char &Y)
 {
     do
@@ -45,31 +63,148 @@ void getCoordinates(char &X, char &Y)
 
         cout << "\nEnter the X coordinate (A-H):\n";
         cin >> X;
-        if (!((X >= 'A' && X <= 'H') || (X >= 'a' && X <= 'h')))
+        if (!checkValidX(X))
         {
             cout << "Invalid entry. Please try again";
         }
-    } while (!((X >= 'A' && X <= 'H') || (X >= 'a' && X <= 'h')));
+    } while (!checkValidX(X));
 
     do
     {
         cout << "\nEnter the Y coordinate (1-8):\n";
         cin >> Y;
-        if (!(Y >= '1' && Y <= '8'))
+        if (!checkValidY(Y))
         {
             cout << "Invalid entry. Please try again";
         }
-    } while (!(Y >= '1' && Y <= '8'));
+    } while (!checkValidY(Y));
 }
 
-void addShips(int &count)
+bool checkIfPointPossible(char X, char Y, char direction, int length, char shipBoard[8][8])
+{
+    // Condtion 1: Exceeds the box
+    int integerCharY = Y - '0';
+    int integerCharX = tolower(X) - 97;
+    for (int i = 0; i < 8; i++)
+    {
+        for (int j = 0; j < 8; j++)
+        {
+            if (integerCharX == i && integerCharY - 1 == j)
+            {
+                switch (direction)
+                {
+                case 'N':
+                case 'n':
+                    if (integerCharX - length < 0)
+                    {
+                        return false;
+                    }
+                    break;
+                case 'S':
+                case 's':
+                    if (integerCharX + length > 7)
+                    {
+                        return false;
+                    }
+                    break;
+                case 'E':
+                case 'e':
+                    if (integerCharY + length > 7)
+                    {
+                        return false;
+                    }
+                    break;
+                case 'W':
+                case 'w':
+                    if (integerCharY - length < 0)
+                    {
+                        return false;
+                    }
+                    break;
+                }
+            }
+        }
+    }
+    return true;
+}
+void printBoard(char board[8][8])
+{
+    cout << "      A - B - C - D - E - F - G - H\n";
+    for (int i = 0; i < 8; i++)
+    {
+        cout << "- - - - - - - - - - - - - - - - - - -\n";
+        cout << i + 1 << " | ";
+        for (int j = 0; j < 8; j++)
+            cout << "   " << board[i][j];
+        cout << "\n";
+    }
+}
+void addShips(int &count, char shipBoard[8][8], int &totalCells)
 {
     char X, Y, direction = 'z';
+    int length = 0, shipLength = 0;
     cout << "\n----- Adding Ship " << count + 1 << " of 5 ----- ";
     getCoordinates(X, Y);
     getDirection(direction);
-    cout << "\nYou have added a ship to the coordinates X: " << X << " and Y:" << Y << " in " << direction << " direction\n\n";
-    count++;
+    cout << "\n Enter ship length: ";
+    cin >> shipLength;
+    int integerCharY = Y - '0';
+    int integerCharX = tolower(X) - 97;
+    if (checkIfPointPossible(X, Y, direction, shipLength, shipBoard))
+    {
+        for (int i = 0; i < 8; i++)
+        {
+            for (int j = 0; j < 8; j++)
+            {
+
+                if (integerCharX == i && integerCharY - 1 == j)
+                {
+                    shipBoard[j][i] = 'S';
+                    int tempI = i;
+                    int tempJ = j;
+                    switch (direction)
+                    {
+                    case 'N':
+                    case 'n':
+                        while (++length < shipLength)
+                        {
+                            shipBoard[--tempJ][i] = 'S';
+                        };
+                        break;
+                    case 'S':
+                    case 's':
+                        while (++length < shipLength)
+                        {
+                            shipBoard[++tempJ][i] = 'S';
+                        };
+                        break;
+                    case 'E':
+                    case 'e':
+                        while (++length < shipLength)
+                        {
+                            shipBoard[j][++tempI] = 'S';
+                        };
+                        break;
+                    case 'W':
+                    case 'w':
+                        while (++length < shipLength)
+                        {
+                            shipBoard[j][--tempI] = 'S';
+                        };
+                        break;
+                    }
+                }
+            }
+        }
+        cout << "\nYou have added a ship to the coordinates X: " << X << " and Y:" << Y << " in " << direction << " direction\n\n";
+        count++;
+        totalCells = totalCells + shipLength;
+    }
+    else
+    {
+        cout << "\nInvalid entry. Please try again! \n";
+    }
+    printBoard(shipBoard);
 }
 void enterToContinue()
 {
@@ -83,23 +218,56 @@ void displayBoardState(int fireCount)
 {
     int turn = fireCount;
     cout << "\n_____________________________";
-    cout << "\n\nTurn " << turn + 1;
+    if(turn>0)
+        cout << "\n\nTurn " << turn;
     cout << "\nDisplaying the current board state\n\n";
+    // printBoard(hitBoard);
 }
 
-void fireShip(char playerName)
+void fireShip(char playerName, char hitBoard[8][8], char shipBoard[8][8], int totalCells)
 {
     char X, Y;
-    int fireCount = 0;
+    int fireCount = 0, hitCells = 0;
     cout << "\nPlayer " << playerName << " enter coordinates to fire:";
     cout << "\n____________________________________";
-    while (fireCount < 2)
+    printBoard(hitBoard);
+    do
     {
         displayBoardState(fireCount);
         getCoordinates(X, Y);
-        cout << "\nYou fired at X: " << X << " and "
-             << " Y: " << Y;
-        fireCount++;
+        int integerCharY = Y - '0';
+        int integerCharX = tolower(X) - 97;
+        if (checkValidY(Y) && checkValidX(X) &&
+            (hitBoard[integerCharY - 1][integerCharX] != 'M' ||
+             hitBoard[integerCharY - 1][integerCharX] != 'H'))
+        {
+            cout << "\nYou fired at X: " << X << " and "
+                 << " Y: " << Y;
+            if (shipBoard[integerCharY - 1][integerCharX] == 'S')
+            {
+                hitBoard[integerCharY - 1][integerCharX] = 'H';
+                cout << "\nYou have a hit!\n";
+                hitCells++;
+                printBoard(hitBoard);
+            }
+            else
+            {
+                hitBoard[integerCharY - 1][integerCharX] = 'M';
+                cout << "\nYou have a miss!\n";
+                printBoard(hitBoard);
+            }
+            fireCount++;
+        }
+        else
+        {
+            cout << "\n Invalid points. Please try again";
+        }
+
+    } while (hitCells != totalCells);
+
+    if (hitCells != 0 && hitCells == totalCells)
+    {
+        cout << "\nYou have won!";
     }
 }
 
@@ -118,24 +286,33 @@ void addShipMenu()
     cout << "\n\t    1  Destroyer       2";
     cout << "\n____________________________________________\n\n";
 }
+void resetShipBoard(char shipBoard[8][8])
+{
+    for (int i = 0; i < 8; i++)
+        for (int j = 0; j < 8; j++)
+            shipBoard[i][j] = ' ';
+}
 
 void beginGame()
 {
     char playerName, X, Y;
-    int count = 0;
+    int count = 0, totalCells = 0;
+    char shipBoard[8][8], hitBoard[8][8];
+    resetShipBoard(shipBoard);
+    resetShipBoard(hitBoard);
     getPlayerName(playerName);
 
     addShipMenu();
     while (count < 2)
     {
-        addShips(count);
-        if (count == 2)
+        addShips(count, shipBoard, totalCells);
+        if (count == 5)
         {
             enterToContinue();
         }
     }
 
-    fireShip(playerName);
+    fireShip(playerName, hitBoard, shipBoard, totalCells);
     enterToContinue();
 }
 
