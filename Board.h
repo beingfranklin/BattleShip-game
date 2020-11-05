@@ -7,7 +7,7 @@
 class Board 
 {
 private:
-    char shipBoard[8][8];
+    char board[8][8];
 
 public:
     virtual ~Board();   

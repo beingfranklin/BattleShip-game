@@ -8,16 +8,18 @@
 #include <iostream>
 using namespace std;
 
-Player::~Player() {
+Player::~Player()
+{
 }
 
-Board::~Board() {
+Board::~Board()
+{
 }
 
 // Added funtion protoype to reuse the printMenu()
 void printMainMenu();
 
-void Player::getPlayerName(char &playerName)
+void getPlayerName(char &playerName)
 {
     cout << "\nEnter player name:\n";
     cin >> playerName;
@@ -244,34 +246,34 @@ bool Player::checkWon(int hitCells, int totalCells)
     return false;
 }
 
-void Player::fireShip(char playerName, char hitBoard[8][8], char shipBoard[8][8], int totalCells)
+void Player::fireShip(char playerName, char hitBoard[8][8], char shipBoard[8][8], int totalCells, int &fireCount, int &hitCells)
 {
     char X, Y;
-    int fireCount = 0, hitCells = 0;
     cout << "\nPlayer " << playerName << " enter coordinates to fire:";
     cout << "\n____________________________________\n";
     // printBoard(hitBoard);
-    do
+    // do
+    // {
+    displayBoardState(fireCount, hitBoard);
+    getCoordinates(X, Y);
+    int integerCharY = Y - '0';
+    int integerCharX = tolower(X) - 97;
+    if (checkValidY(Y) && checkValidX(X) &&
+        (hitBoard[integerCharY - 1][integerCharX] != 'M' ||
+         hitBoard[integerCharY - 1][integerCharX] != 'H'))
     {
-        displayBoardState(fireCount, hitBoard);
-        getCoordinates(X, Y);
-        int integerCharY = Y - '0';
-        int integerCharX = tolower(X) - 97;
-        if (checkValidY(Y) && checkValidX(X) &&
-            (hitBoard[integerCharY - 1][integerCharX] != 'M' ||
-             hitBoard[integerCharY - 1][integerCharX] != 'H'))
-        {
-            cout << "\nYou fired at X: " << X << " and "
-                 << " Y: " << Y;
+        cout << "\nYou fired at X: " << X << " and "
+             << " Y: " << Y;
 
-            fireCount++;
-        }
-        else
-        {
-            cout << "\n Invalid points. Please try again";
-        }
+        printBoard(hitBoard);
+        fireCount++;
+    }
+    else
+    {
+        cout << "\n Invalid points. Please try again";
+    }
 
-    } while (hitCells != totalCells);
+    // } while (hitCells != totalCells);
 
     if (checkWon(hitCells, totalCells))
     {
@@ -305,25 +307,54 @@ void Board::resetShipBoard(char shipBoard[8][8])
 void beginGame()
 {
     Board B;
-    Player A;
-    char playerName, X, Y;
-    int count = 0, totalCells = 0;
-    char shipBoard[8][8], hitBoard[8][8];
-    B.resetShipBoard(shipBoard);
-    B.resetShipBoard(hitBoard);
-    A.getPlayerName(playerName);
+    Player A, C;
+    char playerName1, playerName2, X, Y;
+    int count1 = 0, count2 = 0, totalCells1 = 0, totalCells2 = 0;
+    int fireCount1 = 0, hitCells1 = 0, fireCount2 = 0, hitCells2 = 0;
+    char shipBoard1[8][8], hitBoard1[8][8], shipBoard2[8][8], hitBoard2[8][8];
+    B.resetShipBoard(shipBoard1);
+    B.resetShipBoard(hitBoard1);
+    B.resetShipBoard(shipBoard2);
+    B.resetShipBoard(hitBoard2);
+    getPlayerName(playerName1);
+    getPlayerName(playerName2);
 
     addShipMenu();
-    while (count < 5)
+
+    while (count1 < 2)
     {
-        addShips(count, shipBoard, totalCells);
-        if (count == 5)
+        addShips(count1, shipBoard1, totalCells1);
+        if (count1 == 2)
         {
             enterToContinue();
         }
     }
 
-    A.fireShip(playerName, hitBoard, shipBoard, totalCells);
+    addShipMenu();
+
+    while (count2 < 2)
+    {
+        addShips(count2, shipBoard2, totalCells2);
+        if (count2 == 2)
+        {
+            enterToContinue();
+        }
+    }
+
+    cout<<"\n********\n\n";
+    printBoard(shipBoard1);
+    printBoard(shipBoard2);
+
+
+    do
+    {
+        A.fireShip(playerName1, hitBoard1, shipBoard1, totalCells1, fireCount1, hitCells1);
+        C.fireShip(playerName2, hitBoard2, shipBoard2, totalCells2, fireCount2, hitCells2);
+            cout<<"\n***%%%%%   %%%%*****\n\n";
+    printBoard(hitBoard1);
+    printBoard(hitBoard2);
+    } while (hitCells1 != totalCells1 || hitCells2 != totalCells2);
+
     enterToContinue();
 }
 
