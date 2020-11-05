@@ -2,13 +2,22 @@
 //  ID : 200626510
 //  College Username : ec20076
 
+#include "Board.h"
+#include "Player.h"
+#include "displayBoard.h"
 #include <iostream>
 using namespace std;
+
+Player::~Player() {
+}
+
+Board::~Board() {
+}
 
 // Added funtion protoype to reuse the printMenu()
 void printMainMenu();
 
-void getPlayerName(char &playerName)
+void Player::getPlayerName(char &playerName)
 {
     cout << "\nEnter player name:\n";
     cin >> playerName;
@@ -109,7 +118,7 @@ bool checkIfPointPossible(char X, char Y, char direction, int length, char shipB
                     break;
                 case 'E':
                 case 'e':
-                    if (integerCharY  + length > 7)
+                    if (integerCharY + length > 7)
                     {
                         return false;
                     }
@@ -127,6 +136,7 @@ bool checkIfPointPossible(char X, char Y, char direction, int length, char shipB
     }
     return true;
 }
+
 void printBoard(char board[8][8])
 {
     cout << "      A - B - C - D - E - F - G - H\n";
@@ -139,6 +149,7 @@ void printBoard(char board[8][8])
         cout << "\n";
     }
 }
+
 void addShips(int &count, char shipBoard[8][8], int &totalCells)
 {
     char X, Y, direction = 'z';
@@ -214,17 +225,26 @@ void enterToContinue()
     cin.get();            //“cin>>” expects at least one char input, just enter doesn’t work
 }
 
-void displayBoardState(int fireCount, char hitBoard[8][8])
+void Player::displayBoardState(int fireCount, char hitBoard[8][8])
 {
     int turn = fireCount;
     cout << "\n_____________________________\n";
-    if(turn>0)
+    if (turn > 0)
         cout << "\n\nTurn " << turn;
     cout << "\n\nDisplaying the current board state\n\n";
     printBoard(hitBoard);
 }
 
-void fireShip(char playerName, char hitBoard[8][8], char shipBoard[8][8], int totalCells)
+bool Player::checkWon(int hitCells, int totalCells)
+{
+    if (hitCells != 0 && hitCells == totalCells)
+    {
+        return true;
+    }
+    return false;
+}
+
+void Player::fireShip(char playerName, char hitBoard[8][8], char shipBoard[8][8], int totalCells)
 {
     char X, Y;
     int fireCount = 0, hitCells = 0;
@@ -233,7 +253,7 @@ void fireShip(char playerName, char hitBoard[8][8], char shipBoard[8][8], int to
     // printBoard(hitBoard);
     do
     {
-        displayBoardState(fireCount,hitBoard);
+        displayBoardState(fireCount, hitBoard);
         getCoordinates(X, Y);
         int integerCharY = Y - '0';
         int integerCharX = tolower(X) - 97;
@@ -243,19 +263,7 @@ void fireShip(char playerName, char hitBoard[8][8], char shipBoard[8][8], int to
         {
             cout << "\nYou fired at X: " << X << " and "
                  << " Y: " << Y;
-            if (shipBoard[integerCharY - 1][integerCharX] == 'S')
-            {
-                hitBoard[integerCharY - 1][integerCharX] = 'H';
-                cout << "\nYou have a hit!\n";
-                hitCells++;
-                // printBoard(hitBoard);
-            }
-            else
-            {
-                hitBoard[integerCharY - 1][integerCharX] = 'M';
-                cout << "\nYou have a miss!\n";
-                // printBoard(hitBoard);
-            }
+
             fireCount++;
         }
         else
@@ -265,10 +273,10 @@ void fireShip(char playerName, char hitBoard[8][8], char shipBoard[8][8], int to
 
     } while (hitCells != totalCells);
 
-    if (hitCells != 0 && hitCells == totalCells)
+    if (checkWon(hitCells, totalCells))
     {
         cout << "\nYou have won!";
-        displayBoardState(fireCount,hitBoard);
+        displayBoardState(fireCount, hitBoard);
     }
 }
 
@@ -287,7 +295,7 @@ void addShipMenu()
     cout << "\n\t    1  Destroyer       2";
     cout << "\n____________________________________________\n\n";
 }
-void resetShipBoard(char shipBoard[8][8])
+void Board::resetShipBoard(char shipBoard[8][8])
 {
     for (int i = 0; i < 8; i++)
         for (int j = 0; j < 8; j++)
@@ -296,12 +304,14 @@ void resetShipBoard(char shipBoard[8][8])
 
 void beginGame()
 {
+    Board B;
+    Player A;
     char playerName, X, Y;
     int count = 0, totalCells = 0;
     char shipBoard[8][8], hitBoard[8][8];
-    resetShipBoard(shipBoard);
-    resetShipBoard(hitBoard);
-    getPlayerName(playerName);
+    B.resetShipBoard(shipBoard);
+    B.resetShipBoard(hitBoard);
+    A.getPlayerName(playerName);
 
     addShipMenu();
     while (count < 5)
@@ -313,7 +323,7 @@ void beginGame()
         }
     }
 
-    fireShip(playerName, hitBoard, shipBoard, totalCells);
+    A.fireShip(playerName, hitBoard, shipBoard, totalCells);
     enterToContinue();
 }
 
@@ -376,6 +386,7 @@ void printMainMenu()
 
 int main()
 {
+    Board B;
     printMainMenu();
     return 0;
 }
